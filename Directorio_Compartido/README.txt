@@ -1,6 +1,10 @@
 Espacio Compartido para documentos comunes.
 (Por lo que parece, Ubuntu 20.04 LTS funciona bien ROS)
-
+20/11/2025
+(UPDATE PARA MARCOS)
+Hoy por cualquier cosa raul estaba de buen humor y nos a dado el primer paso a dar machacado 
+tenemos que aprender TODOS ros2 y luego ros2 junto con los sensores lidar venga un beso
+-SEBASTIAN
 # Proyectos a probar:
 https://github.com/reiniscimurs/DRL-robot-navigation?tab=readme-ov-file
 https://github.com/aimechengineer/HomeBot-ROS2-Navigation
