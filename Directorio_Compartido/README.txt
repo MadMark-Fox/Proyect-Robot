@@ -14,3 +14,6 @@ https://github.com/aimechengineer/HomeBot-ROS2-Navigation
 # Proyectos que no funcionan:
 
 # Proyectos candidatos:
+
+#PROYECTO A SEGUIR PARA LA VISIÓN AI
+https://ai.google.dev/edge/mediapipe/solutions/vision/face_detector/python?hl=es-419
