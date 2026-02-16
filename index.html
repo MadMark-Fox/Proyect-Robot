@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Robot Control Center</title>
+
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #eee;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            overflow: hidden;
+            /* Evita scroll al mover el joystick */
+            touch-action: none;
+            /* Mejora respuesta táctil */
+        }
+
+        /* Contenedor de Vídeo */
+        #video-container {
+            width: 100%;
+            height: 45vh;
+            background: #000;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #camera-stream {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* Emoji de Emoción */
+        #emotion-display {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 3rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        /* Zona de Joystick */
+        #zone_joystick {
+            width: 100%;
+            height: 40vh;
+            position: relative;
+            background: #252525;
+            border-top: 2px solid #444;
+        }
+
+        /* Botón de Emergencia */
+        #stop-btn {
+            width: 90%;
+            padding: 15px;
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 10px;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        #stop-btn:active {
+            background-color: #b71c1c;
+        }
+
+        /* Estado de conexión */
+        #status {
+            font-size: 0.8rem;
+            color: #888;
+            margin: 5px;
+        }
+
+        .connected {
+            color: #4caf50 !important;
+        }
+
+        .disconnected {
+            color: #f44336 !important;
+        }
+    </style>
+
+    <script src="eventemitter2.min.js"></script>
+    <script src="roslib.min.js"></script>
+    <script src="nipplejs.min.js"></script>
+</head>
+
+<body>
+
+    <div id="video-container">
+        <img id="camera-stream" src="http://10.42.0.1:8080/stream?topic=/image_raw&type=mjpeg&quality=30">
+        <div id="emotion-display">😴</div>
+    </div>
+
+    <div id="status">Desconectado...</div>
+
+    <div id="zone_joystick"></div>
+
+    <button id="stop-btn" onclick="paradaEmergencia()">¡STOP!</button>
+
+    <script>
+        // --- CONFIGURACIÓN ---
+        var robot_IP = '10.42.0.1'; // IP de la Raspberry Maestra en modo Hotspot
+
+        // 1. Conexión ROS
+        var ros = new ROSLIB.Ros({
+            url: 'ws://' + robot_IP + ':9090'
+        });
+
+        ros.on('connection', function () {
+            document.getElementById("status").innerHTML = "🟢 Conectado al Sistema";
+            document.getElementById("status").className = "connected";
+        });
+
+        ros.on('close', function () {
+            document.getElementById("status").innerHTML = "🔴 Sin Conexión";
+            document.getElementById("status").className = "disconnected";
+        });
+
+        // 2. Topics
+        var cmdVel = new ROSLIB.Topic({
+            ros: ros,
+            name: '/cmd_vel',
+            messageType: 'geometry_msgs/Twist'
+        });
+
+        var emotionListener = new ROSLIB.Topic({
+            ros: ros,
+            name: '/robot/emotion',
+            messageType: 'std_msgs/String'
+        });
+
+        emotionListener.subscribe(function (msg) {
+            var map = {
+                "happy": "😄", "sad": "😢", "angry": "😡",
+                "neutral": "😐", "surprise": "😲", "fear": "😱"
+            };
+            var emoji = map[msg.data] || "🤖";
+            document.getElementById("emotion-display").innerText = emoji;
+        });
+
+        // 3. Joystick
+        var manager = nipplejs.create({
+            zone: document.getElementById('zone_joystick'),
+            mode: 'static',
+            position: { left: '50%', top: '50%' },
+            color: 'white',
+            size: 150
+        });
+
+        // 4. Lógica de Control
+        var moveInterval;
+        var lin = 0, ang = 0;
+
+        manager.on('move', function (evt, data) {
+            if (data && data.vector) {
+                lin = data.vector.y; // Velocidad lineal
+                ang = -data.vector.x; // Giro (Invertido)
+            }
+        });
+
+        manager.on('end', function () {
+            lin = 0; ang = 0;
+            enviarVelocidad(); // Frenar inmediatamente al soltar
+        });
+
+        // Bucle de envío (20Hz = cada 50ms)
+        moveInterval = setInterval(function () {
+            if (lin !== 0 || ang !== 0) {
+                enviarVelocidad();
+            }
+        }, 50);
+
+        function enviarVelocidad() {
+            var twist = new ROSLIB.Message({
+                linear: { x: lin, y: 0, z: 0 },
+                angular: { x: 0, y: 0, z: ang }
+            });
+            cmdVel.publish(twist);
+        }
+
+        function paradaEmergencia() {
+            lin = 0; ang = 0;
+            enviarVelocidad();
+            alert("¡Parada de Emergencia Enviada!");
+        }
+    </script>
+</body>
+
+</html>
