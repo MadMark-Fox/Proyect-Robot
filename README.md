@@ -5,17 +5,6 @@
 
 Proyecto de Fin de Grado (TFG) para el ciclo de **Administración de Sistemas Informáticos en Red (ASIR)**. Consiste en un robot autónomo y controlado a distancia con capacidades de soporte a guardias mediante visión artificial.
 
-## 👨‍🏫 Tutor del Proyecto
-* **Raúl Jímenez Benítez**
-
-## 👥 Integrantes del Proyecto (Grupo 6)
-* Marcos Bolívar Muñoz
-* Sebastián Carrillo Medina
-* Francisco Castillo Martín
-* Laura Linares López
-* Javier Pérez Martín
-* Mario Romera Braojos
-
 ---
 
 ## 📝 Descripción del Proyecto
