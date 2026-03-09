@@ -1,4 +1,4 @@
-# ASIR-TFGRobot 🤖
+# Robot 🤖
 
 [![ROS 2](https://img.shields.io/badge/ROS2-Humble/Foxy-blue)](https://docs.ros.org/)
 [![Python](https://img.shields.io/badge/Python-3.10-yellow)](https://www.python.org/)
